@@ -3,6 +3,11 @@
 (function() {
   var app = angular.module("githubViewer", []);
   var MainController = function($scope, $http, $interval, $log) {
+    //configs
+    $scope.countdown = 5;
+    $scope.repoOrder ="+name";
+
+
 
     var onUserComplete = function(response) {
       $scope.user = response.data;
@@ -19,29 +24,39 @@
       $scope.error = "couldt not fetch data";
       $scope.user = null;
     };
-    $scope.search = function(username) {
-      $log.info("Searching for "+ username)
-      $scope.error="";
-      $http.get("https://api.github.com/users/"+username).then(onUserComplete, onError);
-    };
 
-    var decrementCountDown = function()
+
+    var decrementCountdown = function()
     {
-      $scope.countDown -= 1;
-      if($scope.countDown < 1){
+
+      $scope.countdown -= 1;
+      $log.info("decrementing countdown countdown valor: "+$scope.countdown);
+      if($scope.countdown < 1){
+        $log.info("Search");
         $scope.search($scope.username);
       }
 
     };
 
+    var countdownInterval = null;
     var startCountDown = function(){
-      $interval(decrementCountDown, 1000, 5, $scope.countDown);
+      $log.info("Starting countdown")
+      countdownInterval = $interval(decrementCountdown, 1000, $scope.countdown , $scope.countdown);
     };
 
 
-    
-    $scope.repoOrder ="+name";
-    $scope.countDown = 5;
+    $scope.search = function(username) {
+      $log.info("Searching for "+ username);
+      $scope.error="";
+      $http.get("https://api.github.com/users/"+username).then(onUserComplete, onError);
+
+      if(countdownInterval){
+        $log.info("Stoping countdown")
+        $interval.cancel(countdownInterval);
+        $scope.countdown = null;
+      }
+    };
+
     startCountDown();
 
   };
