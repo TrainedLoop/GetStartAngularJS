@@ -2,7 +2,7 @@
 
 (function() {
   var app = angular.module("githubViewer", []);
-  var MainController = function($scope, $http, $interval, $log) {
+  var MainController = function($scope, $http, $interval, $log, $anchorScroll, $location) {
     //configs
     $scope.countdown = 5;
     $scope.repoOrder ="+name";
@@ -17,6 +17,9 @@
     var onRepos= function (response) {
 
       $scope.repos = response.data;
+      $log.info("Scrolling for result");
+      $location.hash("userDetails");
+      $anchorScroll();
     };
     
     
