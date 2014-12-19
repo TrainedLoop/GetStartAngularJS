@@ -1,22 +1,19 @@
-// Code goes here
-
 (function() {
   var app = angular.module("githubViewer", []);
-  var MainController = function($scope, $http, $interval, $log, $anchorScroll, $location) {
+  var MainController = function($scope, github, $interval, $log, $anchorScroll, $location) {
     //configs
     $scope.countdown = 5;
     $scope.repoOrder ="+name";
 
 
-
-    var onUserComplete = function(response) {
-      $scope.user = response.data;
-      $http.get($scope.user.repos_url).then(onRepos, onError);
+    var onUserComplete = function(data) {
+      $scope.user = data;
+      github.getRepos($scope.user).then(onRepos, onError);
     };
     
-    var onRepos= function (response) {
-
-      $scope.repos = response.data;
+    var onRepos= function (data) {
+      $scope.repos = data;
+      $log.info("teste" +  JSON.stringify(data));
       $log.info("Scrolling for result");
       $location.hash("userDetails");
       $anchorScroll();
@@ -29,16 +26,13 @@
     };
 
 
-    var decrementCountdown = function()
-    {
-
+    var decrementCountdown = function(){
       $scope.countdown -= 1;
       $log.info("decrementing countdown countdown valor: "+$scope.countdown);
       if($scope.countdown < 1){
         $log.info("Search");
         $scope.search($scope.username);
       }
-
     };
 
     var countdownInterval = null;
@@ -50,8 +44,8 @@
 
     $scope.search = function(username) {
       $log.info("Searching for "+ username);
-      $scope.error="";
-      $http.get("https://api.github.com/users/"+username).then(onUserComplete, onError);
+      $scope.error=null;
+      github.getUser(username).then(onUserComplete, onError);
 
       if(countdownInterval){
         $log.info("Stoping countdown")
